@@ -36,6 +36,8 @@ public class UserService implements IUserService {
         User savedUser = userRepository.save(user);
 
         notificationProducer.sendNotification(prepareNotificationDTO(NotificationType.EMAIL, user.getEmail()));
+        notificationProducer.sendNotification(prepareNotificationDTO(NotificationType.SMS, user.getEmail()));
+        notificationProducer.sendNotification(prepareNotificationDTO(NotificationType.MOBILE_NOTIFICATION, user.getEmail()));
 
         return savedUser;
     }
