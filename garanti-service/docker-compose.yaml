@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db-garanti
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: garanti
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+
+  app:
+    build: ./
+    container_name: garanti-service
+    image: garanti-image:latest
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/garanti
+      SPRING_DATASOURCE_USERNAME: my_user
+      SPRING_DATASOURCE_PASSWORD: my_password

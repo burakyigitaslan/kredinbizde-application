@@ -1,0 +1,92 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: kredinbizde
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    networks:
+      - mynetwork
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: 123456
+    networks:
+      - mynetwork
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    container_name: kafkaa
+    restart: always
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+    networks:
+      - mynetwork
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeperr
+    restart: always
+    ports:
+      - "2181:2181"
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
+  app:
+    build: ./
+    container_name: kredinbizde-service
+    image: kredinbizde-service-image:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - kafka
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kredinbizde
+      SPRING_DATASOURCE_USERNAME: my_user
+      SPRING_DATASOURCE_PASSWORD: my_password
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: 123456
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
