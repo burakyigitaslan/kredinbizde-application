@@ -6,7 +6,7 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user-service
+        - id: kredinbizde-service
           uri: lb://KREDINBIZDE-SERVICE
           predicates:
-             - Path=/api/users/**
+             - Path=/api/**
