@@ -78,6 +78,4 @@ Follow these steps to set up and run the project:
     docker-compose up -d
     ```
 
-3. Access the services through their respective ports as described in the [Services](#services) section.
-
 
