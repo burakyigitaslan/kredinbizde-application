@@ -18,11 +18,6 @@ public class ApplicationService {
 
     private final ApplicationConverter applicationConverter;
 
-    /*
-    public ApplicationService(ApplicationConverter applicationConverter) {
-        this.applicationConverter = applicationConverter;
-    }*/
-
     public ApplicationResponse createApplication(ApplicationRequest request) {
 
         Application application = applicationConverter.toApplication(request);
