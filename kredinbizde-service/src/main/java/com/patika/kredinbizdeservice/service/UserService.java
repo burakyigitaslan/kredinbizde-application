@@ -80,9 +80,9 @@ public class UserService implements IUserService {
 
         Optional<User> foundUser = userRepository.findByEmail(email);
 
-        User fUser = foundUser.orElseThrow(() -> new KredinbizdeException(ExceptionMessages.USER_NOT_FOUND));
+        User userUpdated = foundUser.orElseThrow(() -> new KredinbizdeException(ExceptionMessages.USER_NOT_FOUND));
 
-        user.setId(fUser.getId());
+        user.setId(userUpdated.getId());
 
         return userRepository.save(user);
     }
