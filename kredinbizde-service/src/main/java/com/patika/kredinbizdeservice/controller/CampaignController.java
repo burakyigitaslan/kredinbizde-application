@@ -53,12 +53,6 @@ public class CampaignController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/orderByDateDesc")
-    public ResponseEntity<List<Campaign>> getAllCampaignsOrderByCreatedDateDesc() {
-        List<Campaign> campaigns = campaignService.getAllCampaignsOrderByCreatedDateDesc();
-        return new ResponseEntity<>(campaigns, HttpStatus.OK);
-    }
-
     @GetMapping("/byCreditCardName/{creditCardName}")
     public ResponseEntity<List<Campaign>> getCampaignsByCreditCardName(@PathVariable String creditCardName) {
         List<Campaign> campaigns = campaignService.getCampaignsByCreditCardName(creditCardName);

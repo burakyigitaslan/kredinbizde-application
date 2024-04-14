@@ -32,15 +32,8 @@ public class CreditCardService implements ICreditCardService {
 
     @Override
     public List<CreditCard> getCreditCardsByBankName(String bankName) {
-        Optional<List<CreditCard>> foundCreditCards = creditCardRepository.findAllByBank_Name(bankName);
 
-        List<CreditCard> creditCards = null;
-
-        if (foundCreditCards.isPresent()) {
-            creditCards = foundCreditCards.get();
-        }
-
-        return creditCards;
+        return creditCardRepository.findAllByBank_Name(bankName);
     }
 
     @Override

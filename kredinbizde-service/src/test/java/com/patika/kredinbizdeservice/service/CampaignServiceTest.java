@@ -86,31 +86,6 @@ public class CampaignServiceTest {
     }
 
     @Test
-    void getAllCampaignsOrderByCreatedDateDesc_Success() {
-        Campaign campaign1 = new Campaign();
-        campaign1.setId(1L);
-        campaign1.setTitle("Test Campaign 1");
-        campaign1.setCreatedDate(LocalDate.now());
-
-        Campaign campaign2 = new Campaign();
-        campaign2.setId(2L);
-        campaign2.setTitle("Test Campaign 2");
-        campaign2.setCreatedDate(LocalDate.now().minusDays(1));
-
-        when(campaignRepository.findAllByOrderByCreatedDateDesc()).thenReturn(Arrays.asList(campaign1, campaign2));
-
-        List<Campaign> campaigns = campaignService.getAllCampaignsOrderByCreatedDateDesc();
-
-        assertNotNull(campaigns);
-        assertEquals(2, campaigns.size());
-
-        assertEquals(campaign1.getId(), campaigns.get(0).getId());
-        assertEquals(campaign2.getId(), campaigns.get(1).getId());
-
-        verify(campaignRepository, times(1)).findAllByOrderByCreatedDateDesc();
-    }
-
-    @Test
     void getCampaignsByCreditCardName_Success() {
         Campaign campaign1 = new Campaign();
         campaign1.setId(1L);

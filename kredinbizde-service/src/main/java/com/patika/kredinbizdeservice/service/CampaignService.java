@@ -36,11 +36,6 @@ public class CampaignService implements ICampaignService {
     }
 
     @Override
-    public List<Campaign> getAllCampaignsOrderByCreatedDateDesc() {
-        return campaignRepository.findAllByOrderByCreatedDateDesc();
-    }
-
-    @Override
     public List<Campaign> getCampaignsByCreditCardName(String creditCardName){
         Optional<List<Campaign>> foundCampaigns = campaignRepository.findAllByCreditCard_Name(creditCardName);
 

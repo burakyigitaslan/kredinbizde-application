@@ -9,7 +9,7 @@ public interface ICampaignService {
     Campaign createCampaign(Campaign campaign);
     List<Campaign> getAllCampaigns();
     Optional<Campaign> getCampaignById(Long id);
-    List<Campaign> getAllCampaignsOrderByCreatedDateDesc();
+
     List<Campaign> getCampaignsByCreditCardName(String creditCardName);
     Campaign updateCampaign(Campaign campaign);
     void deleteCampaign(Long id);
