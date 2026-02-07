@@ -7,14 +7,30 @@ Welcome to the Kredinbizde Application project! This project demonstrates a micr
 ## Table of Contents
 
 - [Introduction](#introduction)
+- [Technologies](#technologies)
 - [Architecture](#architecture)
 - [Services](#services)
 - [Setup](#setup)
+- [Usage](#usage)
+- [Stopping](#stopping)
 
 
 ## Introduction
 
 The project showcases a microservices architecture, which is a distributed approach to building software systems. In this architecture, the application is divided into multiple loosely coupled services, each responsible for a specific set of functionalities. These services communicate with each other through APIs and message queues.
+
+## Technologies
+
+This project is built using the following technologies:
+
+- **Java 21**: Primary programming language
+- **Spring Boot 3**: Framework for building microservices
+- **Spring Cloud**: Tools for distributed systems and microservices patterns
+- **PostgreSQL**: Relational database for persistent storage
+- **RabbitMQ**: Message broker for asynchronous communication
+- **Kafka**: Distributed event streaming platform
+- **Redis**: In-memory data store for caching
+- **Docker**: Containerization platform for deployment
 
 ## Architecture
 
@@ -37,6 +53,18 @@ The application consists of several services:
 
 
 ## Services
+
+### Kredinbizde Discovery
+
+- **Description**: Service discovery server implemented using Eureka, responsible for service registration and discovery.
+- **Port**: 8761
+- **Dashboard**: [Eureka Dashboard](http://localhost:8761)
+
+### Kredinbizde Gateway (API Gateway)
+
+- **Description**: API Gateway implemented using Spring Cloud Gateway, acts as a single entry point for clients to access microservices.
+- **Port**: 8084
+- **Dependencies**: Service Discovery (kredinbizde-discovery)
 
 ### Akbank Service
 
@@ -69,13 +97,59 @@ The application consists of several services:
 
 Follow these steps to set up and run the project:
 
-1. Clone the repository.
+### Prerequisites
 
+Before you begin, ensure you have the following installed:
 
-2. Start the services using Docker Compose:
+- **Java 21**: Required for building the microservices
+- **Maven**: Build automation tool for Java projects
+- **Docker**: For containerizing and running the services
+
+### Steps
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/burakyigitaslan/kredinbizde-application.git
+    cd kredinbizde-application
+    ```
+
+2. Build all microservices using Maven:
+
+    ```bash
+    mvn clean package -DskipTests
+    ```
+
+    **Note**: This step is crucial as the Dockerfiles copy JAR files from the `target/` directory of each service. Without building first, Docker image creation will fail.
+
+3. Start all services using Docker Compose:
 
     ```bash
     docker-compose up -d
     ```
+
+4. Wait for all services to start. You can check the status with:
+
+    ```bash
+    docker-compose ps
+    ```
+
+## Usage
+
+Once all services are running, you can access:
+
+- **API Gateway**: [http://localhost:8084](http://localhost:8084)
+- **Discovery Server**: [http://localhost:8761](http://localhost:8761)
+- **Kredinbizde Service Swagger**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **Akbank Service Swagger**: [http://localhost:8081/swagger-ui/index.html](http://localhost:8081/swagger-ui/index.html)
+- **Garanti Service Swagger**: [http://localhost:8083/swagger-ui/index.html](http://localhost:8083/swagger-ui/index.html)
+
+## Stopping
+
+To stop all services, run:
+
+```bash
+docker-compose down
+```
 
 
