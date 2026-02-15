@@ -1,83 +1,182 @@
-
-
 # Kredinbizde Application
 
-Welcome to the Kredinbizde Application project! This project demonstrates a microservices architecture for managing applications and users, along with integration with external services such as Akbank and Garanti.
+A microservices-based loan aggregation platform that connects users with multiple banks (Akbank, Garanti) for loan applications, credit cards, and campaigns. Built with event-driven architecture for scalability and resilience.
 
-## Table of Contents
+## Architecture Overview
 
-- [Introduction](#introduction)
-- [Architecture](#architecture)
-- [Services](#services)
-- [Setup](#setup)
+```
+                        ┌──────────────────┐
+                        │   API Gateway    │
+                        │     (:8084)      │
+                        └───────┬──────────┘
+                                │
+                   ┌────────────┼────────────┐
+                   │            │            │
+          ┌────────▼──┐  ┌─────▼──────┐  ┌──▼───────────┐
+          │  Akbank   │  │ Kredinbizde│  │   Garanti    │
+          │  Service  │  │  Service   │  │   Service    │
+          │  (:8081)  │  │  (:8080)   │  │   (:8083)    │
+          └───────────┘  └──┬───┬─────┘  └──────────────┘
+                            │   │
+                 ┌──────────┘   └──────────┐
+                 │                         │
+          ┌──────▼──────┐          ┌───────▼──────┐
+          │  RabbitMQ   │          │    Kafka     │
+          │  (:5672)    │          │   (:9092)    │
+          └──────┬──────┘          └──────────────┘
+                 │
+       ┌─────────▼──────────┐
+       │ Notification Svc   │
+       │     (:8082)        │
+       └────────────────────┘
 
+       All services register with Eureka Discovery (:8761)
+       Kredinbizde Service uses Redis (:6379) for caching
+```
 
-## Introduction
+## Key Features
 
-The project showcases a microservices architecture, which is a distributed approach to building software systems. In this architecture, the application is divided into multiple loosely coupled services, each responsible for a specific set of functionalities. These services communicate with each other through APIs and message queues.
+- **Loan Aggregation** — Compare and apply for loans across multiple bank partners
+- **Credit Card Management** — Browse and manage credit card offerings
+- **Campaign Engine** — Bank-specific campaigns with sector and product targeting
+- **Multi-Channel Notifications** — Email, SMS, and mobile push via Strategy pattern
+- **Event-Driven Messaging** — RabbitMQ for notifications, Kafka for application events
+- **Service Discovery** — Eureka-based dynamic service registration
+- **API Gateway** — Centralized routing and entry point
+- **Caching** — Redis caching for high-read operations
+- **Unit Tested** — Service-layer tests for all core domains
 
-## Architecture
+## Tech Stack
 
-The architecture of the project consists of the following components:
-
-- **Discovery Server**: The discovery server, implemented using Eureka, is responsible for service discovery and registration. It allows services to locate and communicate with each other without prior knowledge of network topology.
-
-- **API Gateway**: The API gateway, implemented using Spring Cloud Gateway, acts as a single entry point for clients to access various microservices. It provides routing, filtering, and load balancing functionalities, making it easier to manage and secure the system's APIs.
-
-- **Microservices**: The project comprises multiple microservices, each responsible for specific business functions. These microservices communicate with each other via HTTP RESTful APIs.
-
-- **Databases**: PostgreSQL databases are used to store persistent data for each microservice.
-
-The application consists of several services:
-
-- **Akbank Service**: Manages applications related to Akbank.
-- **Garanti Service**: Manages applications related to Garanti.
-- **Kredinbizde Service**: Core service managing user-related operations and integrating with Akbank and Garanti services.
-- **Notification Service**: Handles notifications using RabbitMQ as a message broker.
-
+| Layer          | Technology                              |
+| :------------- | :-------------------------------------- |
+| Language       | Java 17, Spring Boot 3                  |
+| Cloud          | Spring Cloud (Gateway, Eureka, OpenFeign) |
+| Database       | PostgreSQL (database-per-service)       |
+| Messaging      | Apache Kafka, RabbitMQ                  |
+| Caching        | Redis                                   |
+| Containerization | Docker, Docker Compose                |
+| API Docs       | Swagger / OpenAPI                       |
+| Testing        | JUnit 5, Mockito                        |
 
 ## Services
 
-### Akbank Service
+| Service | Port | Description | Docs |
+| :--- | :--- | :--- | :--- |
+| **API Gateway** | `8084` | Routes all external requests to downstream services | — |
+| **Kredinbizde Service** | `8080` | Core platform — users, applications, loans, campaigns, credit cards | [Swagger](http://localhost:8080/swagger-ui/index.html) |
+| **Akbank Service** | `8081` | Akbank loan product integration | [Swagger](http://localhost:8081/swagger-ui/index.html) |
+| **Garanti Service** | `8083` | Garanti loan product integration | [Swagger](http://localhost:8083/swagger-ui/index.html) |
+| **Notification Service** | `8082` | Consumes RabbitMQ messages and dispatches notifications | — |
+| **Discovery Server** | `8761` | Eureka service registry | [Dashboard](http://localhost:8761) |
 
-- **Description**: Manages applications related to Akbank.
-- **Port**: 8081
-- **Dependencies**: PostgreSQL (postgres-akbank), Service Discovery (kredinbizde-discovery)
-- **API Documentation**: [Swagger UI](http://localhost:8081/swagger-ui/index.html)
+## Domain Model (Kredinbizde Service)
 
-### Garanti Service
+`User` · `Application` · `Bank` · `Loan` · `CreditCard` · `Campaign` · `Address` · `Log`
 
-- **Description**: Manages applications related to Garanti.
-- **Port**: 8083
-- **Dependencies**: PostgreSQL (postgres-garanti), Service Discovery (kredinbizde-discovery)
-- **API Documentation**: [Swagger UI](http://localhost:8083/swagger-ui/index.html)
+## API Endpoints
 
-### Kredinbizde Service
+### Users
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/users` | Create a new user |
+| GET | `/api/users` | List all users |
+| GET | `/api/users/{email}` | Get user by email |
 
-- **Description**: Core service managing user-related operations and integrating with Akbank and Garanti services.
-- **Port**: 8080
-- **Dependencies**: PostgreSQL (postgres-kredinbizde), RabbitMQ (rabbitmq), Kafka (kafka), Redis (redis), Service Discovery (kredinbizde-discovery)
-- **API Documentation**: [Swagger UI](http://localhost:8080/swagger-ui/index.html)
+### Applications
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/applications` | Create a loan application |
+| GET | `/api/applications` | List all applications |
+| GET | `/api/applications/user/{userId}` | Get applications by user |
+| GET | `/api/applications/{applicationId}` | Get application by ID |
 
-### Notification Service
+### Banks
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/banks` | Create a bank |
+| GET | `/api/banks` | List all banks |
 
-- **Description**: Handles notifications using RabbitMQ as a message broker.
-- **Port**: 8082
-- **Dependencies**: RabbitMQ (rabbitmq), Service Discovery (kredinbizde-discovery)
+### Loans
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/loans` | Create a loan |
+| GET | `/api/loans` | List all loans |
 
-## Setup
+### Credit Cards
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/credit-cards` | Create a credit card |
+| GET | `/api/credit-cards` | List all credit cards |
+| GET | `/api/credit-cards/{creditCardId}` | Get credit card by ID |
 
-Follow these steps to set up and run the project:
+### Campaigns
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/campaigns` | Create a campaign |
+| GET | `/api/campaigns` | List all campaigns |
+| GET | `/api/campaigns/{campaignId}` | Get campaign by ID |
 
-1. Clone the repository.
+### Addresses
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| POST | `/api/addresses` | Create an address |
+| GET | `/api/addresses` | List all addresses |
 
+## Design Patterns
 
-2. Start the services using Docker Compose:
+- **Strategy** — Notification dispatching (`EmailNotificationStrategy`, `SmsNotificationStrategy`, `MobileNotificationStrategy`) selected at runtime via `NotificationStrategyFactory`
+- **Service-Interface Segregation** — Every service implements a corresponding interface for loose coupling
+- **Database per Service** — Each microservice owns its own PostgreSQL schema
+- **API Gateway** — Single entry point abstracting internal topology
+- **Event-Driven** — Async communication between Kredinbizde Service and Notification Service via RabbitMQ; Kafka for application event streaming
 
-    ```bash
-    docker-compose up -d
-    ```
+## How to Run
 
-3. Access the services through their respective ports as described in the [Services](#services) section.
+### Prerequisites
+- Docker & Docker Compose
 
+### Start
 
+```bash
+git clone https://github.com/burakyigitaslan/kredinbizde-application.git
+cd kredinbizde-application
+docker-compose up -d
+```
+
+### Access Points
+
+| Resource | URL |
+| :--- | :--- |
+| API Gateway | http://localhost:8084 |
+| Eureka Dashboard | http://localhost:8761 |
+| RabbitMQ Management | http://localhost:15672 (admin / 123456) |
+| Kredinbizde Swagger | http://localhost:8080/swagger-ui/index.html |
+| Akbank Swagger | http://localhost:8081/swagger-ui/index.html |
+| Garanti Swagger | http://localhost:8083/swagger-ui/index.html |
+
+## Project Structure
+
+```
+kredinbizde-application/
+├── kredinbizde-service/      # Core platform service
+│   ├── controller/           # REST controllers (7)
+│   ├── service/              # Business logic + interfaces
+│   ├── model/                # JPA entities + column constants
+│   ├── repository/           # Spring Data JPA repositories
+│   ├── client/               # Feign clients (Akbank, Garanti)
+│   ├── producer/             # Kafka & RabbitMQ producers
+│   │   └── strategy/         # Notification strategy pattern
+│   ├── configuration/        # Spring configs
+│   ├── converter/            # DTO converters
+│   ├── dto/                  # Data transfer objects
+│   ├── enums/                # Domain enums
+│   ├── exceptions/           # Custom exceptions
+│   └── kafkaconsumer/        # Kafka consumers
+├── akbank-service/           # Akbank bank integration
+├── garanti-service/          # Garanti bank integration
+├── notification-service/     # Notification consumer (RabbitMQ)
+├── kredinbizde-discovery/    # Eureka discovery server
+├── kredinbizde-gw/           # Spring Cloud Gateway
+└── docker-compose.yaml       # Full stack orchestration
+```
